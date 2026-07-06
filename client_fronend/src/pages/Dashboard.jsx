@@ -1,35 +1,18 @@
-import { Routes, Route, Link, useNavigate } from 'react-router-dom';
+import { Routes, Route, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
-// Placeholder pages for each role
-function WorkerHome() {
-  return <div className="dashboard-section"><h2>Worker Home</h2><p>Total Submissions: 0 | Pending: 0 | Earned: $0</p></div>;
-}
+// Worker Pages
+import WorkerHome from './worker/WorkerHome';
+import TaskList from './worker/TaskList';
+import TaskDetails from './worker/TaskDetails';
+import MySubmissions from './worker/MySubmissions';
 
-function WorkerTasks() {
-  return <div className="dashboard-section"><h2>Available Tasks</h2><p>No tasks available yet.</p></div>;
-}
+// Buyer Pages
+import BuyerHome from './buyer/BuyerHome';
+import AddTask from './buyer/AddTask';
+import BuyerMyTasks from './buyer/MyTasks';
 
-function WorkerSubmissions() {
-  return <div className="dashboard-section"><h2>My Submissions</h2><p>You have no submissions yet.</p></div>;
-}
-
-function WorkerWithdrawals() {
-  return <div className="dashboard-section"><h2>Withdrawals</h2><p>Manage your coin withdrawals here.</p></div>;
-}
-
-function BuyerHome() {
-  return <div className="dashboard-section"><h2>Buyer Home</h2><p>Tasks: 0 | Pending: 0 | Spent: $0</p></div>;
-}
-
-function BuyerAddTask() {
-  return <div className="dashboard-section"><h2>Add New Task</h2><p>Create a new task form here.</p></div>;
-}
-
-function BuyerTasks() {
-  return <div className="dashboard-section"><h2>My Tasks</h2><p>You have no tasks yet.</p></div>;
-}
-
+// Placeholder pages
 function BuyerPurchaseCoins() {
   return <div className="dashboard-section"><h2>Purchase Coins</h2><p>Coin packages available here.</p></div>;
 }
@@ -50,9 +33,12 @@ function AdminWithdrawals() {
   return <div className="dashboard-section"><h2>Withdrawal Requests</h2><p>Pending withdrawals here.</p></div>;
 }
 
+function WorkerWithdrawals() {
+  return <div className="dashboard-section"><h2>Withdrawals</h2><p>Manage your coin withdrawals here.</p></div>;
+}
+
 export default function Dashboard() {
   const { user } = useAuth();
-  const navigate = useNavigate();
 
   if (!user) {
     return <div className="dashboard-section">Loading...</div>;
@@ -61,7 +47,7 @@ export default function Dashboard() {
   const dashboardMenus = {
     worker: [
       { label: 'Home', path: 'worker-home' },
-      { label: 'Task List', path: 'task-list' },
+      { label: 'Browse Tasks', path: 'task-list' },
       { label: 'My Submissions', path: 'my-submissions' },
       { label: 'Withdrawals', path: 'withdrawals' },
     ],
@@ -103,16 +89,17 @@ export default function Dashboard() {
           {user.role === 'worker' && (
             <>
               <Route path="worker-home" element={<WorkerHome />} />
-              <Route path="task-list" element={<WorkerTasks />} />
-              <Route path="my-submissions" element={<WorkerSubmissions />} />
+              <Route path="task-list" element={<TaskList />} />
+              <Route path="task-details/:taskId" element={<TaskDetails />} />
+              <Route path="my-submissions" element={<MySubmissions />} />
               <Route path="withdrawals" element={<WorkerWithdrawals />} />
             </>
           )}
           {user.role === 'buyer' && (
             <>
               <Route path="buyer-home" element={<BuyerHome />} />
-              <Route path="add-task" element={<BuyerAddTask />} />
-              <Route path="my-tasks" element={<BuyerTasks />} />
+              <Route path="add-task" element={<AddTask />} />
+              <Route path="my-tasks" element={<BuyerMyTasks />} />
               <Route path="purchase-coins" element={<BuyerPurchaseCoins />} />
             </>
           )}
@@ -124,7 +111,7 @@ export default function Dashboard() {
               <Route path="manage-withdrawals" element={<AdminWithdrawals />} />
             </>
           )}
-          <Route path="*" element={<WorkerHome />} />
+          <Route path="*" element={user.role === 'worker' ? <WorkerHome /> : user.role === 'buyer' ? <BuyerHome /> : <AdminHome />} />
         </Routes>
       </main>
     </div>

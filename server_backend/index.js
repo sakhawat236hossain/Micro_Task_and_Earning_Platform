@@ -4,6 +4,8 @@ const dotenv = require('dotenv');
 const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
 const authRoutes = require('./routes/auth');
+const tasksRoutes = require('./routes/tasks');
+const submissionsRoutes = require('./routes/submissions');
 
 dotenv.config();
 
@@ -19,6 +21,8 @@ app.get('/', (req, res) => {
 });
 
 app.use('/api/auth', authRoutes);
+app.use('/api/tasks', tasksRoutes);
+app.use('/api/submissions', submissionsRoutes);
 
 mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/taskearn')
   .then(() => {
