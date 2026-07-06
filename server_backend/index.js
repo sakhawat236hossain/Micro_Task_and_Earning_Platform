@@ -6,6 +6,8 @@ const cookieParser = require('cookie-parser');
 const authRoutes = require('./routes/auth');
 const tasksRoutes = require('./routes/tasks');
 const submissionsRoutes = require('./routes/submissions');
+const withdrawalsRoutes = require('./routes/withdrawals');
+const adminRoutes = require('./routes/admin');
 
 dotenv.config();
 
@@ -23,6 +25,8 @@ app.get('/', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/tasks', tasksRoutes);
 app.use('/api/submissions', submissionsRoutes);
+app.use('/api/withdrawals', withdrawalsRoutes);
+app.use('/api/admin', adminRoutes);
 
 mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/taskearn')
   .then(() => {

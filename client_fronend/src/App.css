@@ -687,3 +687,71 @@
   }
 }
 
+/* Withdrawal Styles */
+.withdrawal-info {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.info-card {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: white;
+  padding: 16px;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.info-label {
+  font-size: 0.85rem;
+  margin: 0 0 8px;
+  opacity: 0.9;
+}
+
+.info-value {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.withdrawal-form {
+  background: white;
+  border: 1px solid #e2e8f0;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 24px;
+  display: grid;
+  gap: 16px;
+}
+
+.withdrawal-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-weight: 600;
+}
+
+.withdrawal-form input,
+.withdrawal-form select {
+  padding: 10px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 1rem;
+}
+
+.withdrawal-history {
+  margin-top: 24px;
+}
+
+.withdrawals-section {
+  margin-top: 24px;
+}
+
+@media (max-width: 768px) {
+  .withdrawal-info {
+    grid-template-columns: 1fr;
+  }
+}
+

@@ -6,35 +6,21 @@ import WorkerHome from './worker/WorkerHome';
 import TaskList from './worker/TaskList';
 import TaskDetails from './worker/TaskDetails';
 import MySubmissions from './worker/MySubmissions';
+import Withdrawals from './worker/Withdrawals';
 
 // Buyer Pages
 import BuyerHome from './buyer/BuyerHome';
 import AddTask from './buyer/AddTask';
 import BuyerMyTasks from './buyer/MyTasks';
 
+// Admin Pages
+import AdminHome from './admin/AdminHome';
+import ManageUsers from './admin/ManageUsers';
+import ManageTasks from './admin/ManageTasks';
+
 // Placeholder pages
 function BuyerPurchaseCoins() {
   return <div className="dashboard-section"><h2>Purchase Coins</h2><p>Coin packages available here.</p></div>;
-}
-
-function AdminHome() {
-  return <div className="dashboard-section"><h2>Admin Home</h2><p>Workers: 0 | Buyers: 0 | Total Coins: 0</p></div>;
-}
-
-function AdminUsers() {
-  return <div className="dashboard-section"><h2>Manage Users</h2><p>User management table here.</p></div>;
-}
-
-function AdminTasks() {
-  return <div className="dashboard-section"><h2>Manage Tasks</h2><p>Task management table here.</p></div>;
-}
-
-function AdminWithdrawals() {
-  return <div className="dashboard-section"><h2>Withdrawal Requests</h2><p>Pending withdrawals here.</p></div>;
-}
-
-function WorkerWithdrawals() {
-  return <div className="dashboard-section"><h2>Withdrawals</h2><p>Manage your coin withdrawals here.</p></div>;
 }
 
 export default function Dashboard() {
@@ -61,7 +47,6 @@ export default function Dashboard() {
       { label: 'Home', path: 'admin-home' },
       { label: 'Manage Users', path: 'manage-users' },
       { label: 'Manage Tasks', path: 'manage-tasks' },
-      { label: 'Withdrawals', path: 'manage-withdrawals' },
     ],
   };
 
@@ -92,7 +77,7 @@ export default function Dashboard() {
               <Route path="task-list" element={<TaskList />} />
               <Route path="task-details/:taskId" element={<TaskDetails />} />
               <Route path="my-submissions" element={<MySubmissions />} />
-              <Route path="withdrawals" element={<WorkerWithdrawals />} />
+              <Route path="withdrawals" element={<Withdrawals />} />
             </>
           )}
           {user.role === 'buyer' && (
@@ -106,9 +91,8 @@ export default function Dashboard() {
           {user.role === 'admin' && (
             <>
               <Route path="admin-home" element={<AdminHome />} />
-              <Route path="manage-users" element={<AdminUsers />} />
-              <Route path="manage-tasks" element={<AdminTasks />} />
-              <Route path="manage-withdrawals" element={<AdminWithdrawals />} />
+              <Route path="manage-users" element={<ManageUsers />} />
+              <Route path="manage-tasks" element={<ManageTasks />} />
             </>
           )}
           <Route path="*" element={user.role === 'worker' ? <WorkerHome /> : user.role === 'buyer' ? <BuyerHome /> : <AdminHome />} />
