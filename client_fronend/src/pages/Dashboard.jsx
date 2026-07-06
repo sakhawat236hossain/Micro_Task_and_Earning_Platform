@@ -12,16 +12,12 @@ import Withdrawals from './worker/Withdrawals';
 import BuyerHome from './buyer/BuyerHome';
 import AddTask from './buyer/AddTask';
 import BuyerMyTasks from './buyer/MyTasks';
+import PurchaseCoins from './buyer/PurchaseCoins';
 
 // Admin Pages
 import AdminHome from './admin/AdminHome';
 import ManageUsers from './admin/ManageUsers';
 import ManageTasks from './admin/ManageTasks';
-
-// Placeholder pages
-function BuyerPurchaseCoins() {
-  return <div className="dashboard-section"><h2>Purchase Coins</h2><p>Coin packages available here.</p></div>;
-}
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -85,7 +81,7 @@ export default function Dashboard() {
               <Route path="buyer-home" element={<BuyerHome />} />
               <Route path="add-task" element={<AddTask />} />
               <Route path="my-tasks" element={<BuyerMyTasks />} />
-              <Route path="purchase-coins" element={<BuyerPurchaseCoins />} />
+              <Route path="purchase-coins" element={<PurchaseCoins />} />
             </>
           )}
           {user.role === 'admin' && (
