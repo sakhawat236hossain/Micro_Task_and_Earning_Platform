@@ -10,34 +10,52 @@ const coinPackages = [
 ];
 
 export default function PurchaseCoins() {
-  const { user, updateCoins } = useAuth();
+  const { user, token, updateCoins } = useAuth();
   const [selectedPackage, setSelectedPackage] = useState(null);
   const [showPayment, setShowPayment] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('card');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState('');
+  const [error, setError] = useState('');
+
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
   const handleSelectPackage = (pkg) => {
     setSelectedPackage(pkg);
     setShowPayment(true);
+    setError('');
   };
 
   const handlePayment = async () => {
     setLoading(true);
+    setError('');
 
-    // Simulate payment processing
-    setTimeout(() => {
-      // Add coins to user
-      const newCoins = user.coins + selectedPackage.coins;
-      updateCoins(newCoins);
+    try {
+      const response = await axios.post(
+        `${API_URL}/payments/purchase`,
+        {
+          coins: selectedPackage.coins,
+          amount: selectedPackage.price,
+          paymentMethod: paymentMethod,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      // Add coins to user (using the returned balance from database)
+      updateCoins(response.data.coins);
       setSuccess(`Successfully purchased ${selectedPackage.coins} coins for $${selectedPackage.price}!`);
       setShowPayment(false);
       setSelectedPackage(null);
-      setLoading(false);
 
       // Hide success message after 3 seconds
       setTimeout(() => setSuccess(''), 3000);
-    }, 2000);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Payment processing failed');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -68,6 +86,7 @@ export default function PurchaseCoins() {
         <div className="modal-overlay">
           <div className="modal-content">
             <h3>Confirm Purchase</h3>
+            {error && <div className="error-message">{error}</div>}
             <p>You are about to purchase:</p>
             <div className="payment-details">
               <p>

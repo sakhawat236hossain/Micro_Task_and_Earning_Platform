@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
+import { uploadToImgBB } from '../../utils/upload';
 
 export default function AddTask() {
   const { user, token, updateCoins } = useAuth();
@@ -16,12 +17,28 @@ export default function AddTask() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState('');
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setUploadingImage(true);
+    setError('');
+    try {
+      const url = await uploadToImgBB(file);
+      setForm((prev) => ({ ...prev, taskImageUrl: url }));
+    } catch (err) {
+      setError(err.message || 'Image upload failed');
+    } finally {
+      setUploadingImage(false);
+    }
   };
 
   const calculateTotal = () => {
@@ -157,21 +174,23 @@ export default function AddTask() {
         </label>
 
         <label>
-          Task Image URL (optional)
-          <input
-            type="url"
-            name="taskImageUrl"
-            value={form.taskImageUrl}
-            onChange={handleChange}
-            placeholder="https://example.com/image.jpg"
-          />
-        </label>
+           Task Image
+           <input
+             type="file"
+             accept="image/*"
+             onChange={handleImageUpload}
+           />
+           {uploadingImage && <span style={{ fontSize: '0.85rem', color: '#2563eb', marginTop: '4px' }}>Uploading to imgBB...</span>}
+           {form.taskImageUrl && (
+             <img src={form.taskImageUrl} alt="Task Preview" style={{ width: '120px', height: '80px', objectFit: 'cover', borderRadius: '6px', marginTop: '6px' }} />
+           )}
+         </label>
 
         <div className="task-summary">
           <p>Total Cost: {totalPayable} coins (Your balance: {user.coins} coins)</p>
         </div>
 
-        <button type="submit" className="btn btn-primary" disabled={loading}>
+        <button type="submit" className="btn btn-primary" disabled={loading || uploadingImage}>
           {loading ? 'Creating...' : 'Create Task'}
         </button>
       </form>

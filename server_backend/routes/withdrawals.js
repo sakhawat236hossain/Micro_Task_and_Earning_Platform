@@ -1,6 +1,7 @@
 const express = require('express');
 const Withdrawal = require('../models/Withdrawal');
 const User = require('../models/User');
+const Notification = require('../models/Notification');
 const auth = require('../middleware/auth');
 
 const router = express.Router();
@@ -24,6 +25,14 @@ router.post('/request', auth, async (req, res) => {
     }
 
     const withdrawalAmount = withdrawalCoin / 20; // 20 coins = 1 dollar
+
+    // Deduct coins immediately from worker in DB
+    const dbUser = await User.findById(user.id);
+    if (!dbUser || dbUser.coins < withdrawalCoin) {
+      return res.status(400).json({ message: 'Insufficient coins' });
+    }
+    dbUser.coins -= withdrawalCoin;
+    await dbUser.save();
 
     const withdrawal = await Withdrawal.create({
       workerEmail: user.email,
@@ -99,11 +108,12 @@ router.put('/:id/approve', auth, async (req, res) => {
     // Update withdrawal status
     await Withdrawal.findByIdAndUpdate(req.params.id, { status: 'approved' }, { new: true });
 
-    // Deduct coins from worker
-    const worker = await User.findOne({ email: withdrawal.workerEmail });
-    if (worker) {
-      await User.findByIdAndUpdate(worker._id, { coins: worker.coins - withdrawal.withdrawalCoin });
-    }
+    // Send notification to worker
+    await Notification.create({
+      message: `Your withdrawal request of $${withdrawal.withdrawalAmount.toFixed(2)} was approved.`,
+      toEmail: withdrawal.workerEmail,
+      actionRoute: '/dashboard/withdrawals',
+    });
 
     res.json({ message: 'Withdrawal approved successfully' });
   } catch (error) {
@@ -132,6 +142,20 @@ router.put('/:id/reject', auth, async (req, res) => {
 
     // Update withdrawal status
     await Withdrawal.findByIdAndUpdate(req.params.id, { status: 'rejected' }, { new: true });
+
+    // Refund coins to worker in DB
+    const worker = await User.findOne({ email: withdrawal.workerEmail });
+    if (worker) {
+      worker.coins += withdrawal.withdrawalCoin;
+      await worker.save();
+    }
+
+    // Send notification to worker
+    await Notification.create({
+      message: `Your withdrawal request of $${withdrawal.withdrawalAmount.toFixed(2)} was rejected. Coins refunded.`,
+      toEmail: withdrawal.workerEmail,
+      actionRoute: '/dashboard/withdrawals',
+    });
 
     res.json({ message: 'Withdrawal rejected successfully' });
   } catch (error) {

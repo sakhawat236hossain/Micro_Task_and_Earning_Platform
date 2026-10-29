@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { loginWithGoogle } from '../firebase';
 
 export default function Login() {
   const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+  const { login, googleLogin } = useAuth();
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -28,6 +29,20 @@ export default function Login() {
     }
   };
 
+  const handleGoogleSignIn = async () => {
+    setError('');
+    setLoading(true);
+    try {
+      const googleUser = await loginWithGoogle();
+      await googleLogin(googleUser.name, googleUser.email, googleUser.photoURL);
+      navigate('/dashboard');
+    } catch (err) {
+      setError(err.message || 'Google sign-in failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="auth-page">
       <form className="auth-card" onSubmit={handleSubmit}>
@@ -44,6 +59,9 @@ export default function Login() {
         </label>
         <button type="submit" className="btn btn-primary" disabled={loading}>
           {loading ? 'Signing in...' : 'Log in'}
+        </button>
+        <button type="button" onClick={handleGoogleSignIn} className="btn btn-secondary" style={{ marginTop: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }} disabled={loading}>
+          <span>🌐</span> Sign in with Google
         </button>
         <p className="auth-link">
           Don't have an account? <a href="/register">Register here</a>

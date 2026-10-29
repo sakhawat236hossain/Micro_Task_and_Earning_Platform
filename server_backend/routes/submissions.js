@@ -2,6 +2,7 @@ const express = require('express');
 const Submission = require('../models/Submission');
 const Task = require('../models/Task');
 const User = require('../models/User');
+const Notification = require('../models/Notification');
 const auth = require('../middleware/auth');
 
 const router = express.Router();
@@ -34,6 +35,13 @@ router.post('/submit', auth, async (req, res) => {
 
     // Decrease required workers count
     await Task.findByIdAndUpdate(taskId, { requiredWorkers: task.requiredWorkers - 1 });
+
+    // Create notification for buyer
+    await Notification.create({
+      message: `New submission from ${user.name} for task "${task.title}".`,
+      toEmail: task.buyerEmail,
+      actionRoute: '/dashboard/buyer-home',
+    });
 
     res.status(201).json({
       message: 'Submission created successfully',
@@ -106,6 +114,13 @@ router.put('/:id/approve', auth, async (req, res) => {
       await User.findByIdAndUpdate(worker._id, { coins: worker.coins + submission.payableAmount });
     }
 
+    // Notify worker of approval
+    await Notification.create({
+      message: `Your submission for task "${submission.taskTitle}" was approved! You earned ${submission.payableAmount} coins.`,
+      toEmail: submission.workerEmail,
+      actionRoute: '/dashboard/my-submissions',
+    });
+
     res.json({ message: 'Submission approved successfully' });
   } catch (error) {
     console.error(error);
@@ -139,6 +154,13 @@ router.put('/:id/reject', auth, async (req, res) => {
     if (task) {
       await Task.findByIdAndUpdate(submission.taskId, { requiredWorkers: task.requiredWorkers + 1 });
     }
+
+    // Notify worker of rejection
+    await Notification.create({
+      message: `Your submission for task "${submission.taskTitle}" was rejected by the buyer.`,
+      toEmail: submission.workerEmail,
+      actionRoute: '/dashboard/my-submissions',
+    });
 
     res.json({ message: 'Submission rejected successfully' });
   } catch (error) {

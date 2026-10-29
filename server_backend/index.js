@@ -8,6 +8,8 @@ const tasksRoutes = require('./routes/tasks');
 const submissionsRoutes = require('./routes/submissions');
 const withdrawalsRoutes = require('./routes/withdrawals');
 const adminRoutes = require('./routes/admin');
+const paymentsRoutes = require('./routes/payments');
+const notificationsRoutes = require('./routes/notifications');
 
 dotenv.config();
 
@@ -27,6 +29,8 @@ app.use('/api/tasks', tasksRoutes);
 app.use('/api/submissions', submissionsRoutes);
 app.use('/api/withdrawals', withdrawalsRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/payments', paymentsRoutes);
+app.use('/api/notifications', notificationsRoutes);
 
 mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/taskearn')
   .then(() => {

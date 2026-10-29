@@ -13,6 +13,7 @@ import BuyerHome from './buyer/BuyerHome';
 import AddTask from './buyer/AddTask';
 import BuyerMyTasks from './buyer/MyTasks';
 import PurchaseCoins from './buyer/PurchaseCoins';
+import MyPayments from './buyer/MyPayments';
 
 // Admin Pages
 import AdminHome from './admin/AdminHome';
@@ -38,6 +39,7 @@ export default function Dashboard() {
       { label: 'Add Task', path: 'add-task' },
       { label: 'My Tasks', path: 'my-tasks' },
       { label: 'Purchase Coins', path: 'purchase-coins' },
+      { label: 'Payment History', path: 'my-payments' },
     ],
     admin: [
       { label: 'Home', path: 'admin-home' },
@@ -82,6 +84,7 @@ export default function Dashboard() {
               <Route path="add-task" element={<AddTask />} />
               <Route path="my-tasks" element={<BuyerMyTasks />} />
               <Route path="purchase-coins" element={<PurchaseCoins />} />
+              <Route path="my-payments" element={<MyPayments />} />
             </>
           )}
           {user.role === 'admin' && (

@@ -86,6 +86,46 @@ router.post('/login', async (req, res) => {
   }
 });
 
+router.post('/google-login', async (req, res) => {
+  try {
+    const { name, email, photoURL } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ message: 'Email is required' });
+    }
+
+    let user = await User.findOne({ email });
+    if (!user) {
+      user = await User.create({
+        name: name || email.split('@')[0],
+        email,
+        password: Math.random().toString(36).slice(-10),
+        role: 'worker',
+        photoURL: photoURL || '',
+        coins: 10,
+      });
+    }
+
+    const token = jwt.sign({ id: user._id, role: user.role, email: user.email }, process.env.JWT_SECRET || 'taskearn-super-secret', { expiresIn: '7d' });
+
+    res.json({
+      message: 'Google login successful',
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        coins: user.coins,
+        photoURL: user.photoURL,
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Google login failed' });
+  }
+});
+
 router.get('/me', auth, async (req, res) => {
   res.json({ user: req.user });
 });

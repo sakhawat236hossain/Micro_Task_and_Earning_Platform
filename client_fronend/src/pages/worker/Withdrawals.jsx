@@ -77,6 +77,9 @@ export default function Withdrawals() {
         }
       );
 
+      // Update client-side coins balance instantly
+      updateCoins(user.coins - coin);
+
       setSuccess('Withdrawal request created! Awaiting admin approval.');
       setWithdrawals([response.data.withdrawal, ...withdrawals]);
       setForm({

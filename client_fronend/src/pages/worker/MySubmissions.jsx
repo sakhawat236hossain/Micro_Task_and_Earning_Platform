@@ -7,6 +7,8 @@ export default function MySubmissions() {
   const [submissions, setSubmissions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
 
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -27,7 +29,14 @@ export default function MySubmissions() {
     fetchSubmissions();
   }, [token]);
 
+  const handleFilterChange = (newFilter) => {
+    setFilter(newFilter);
+    setCurrentPage(1);
+  };
+
   const filteredSubmissions = filter === 'all' ? submissions : submissions.filter((s) => s.status === filter);
+  const totalPages = Math.ceil(filteredSubmissions.length / itemsPerPage);
+  const paginatedSubmissions = filteredSubmissions.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -52,72 +61,98 @@ export default function MySubmissions() {
 
       <div className="filter-buttons">
         <button
-          onClick={() => setFilter('all')}
+          onClick={() => handleFilterChange('all')}
           className={`btn ${filter === 'all' ? 'btn-primary' : 'btn-secondary'}`}
           style={{ marginRight: '8px' }}
         >
           All ({submissions.length})
         </button>
         <button
-          onClick={() => setFilter('pending')}
+          onClick={() => handleFilterChange('pending')}
           className={`btn ${filter === 'pending' ? 'btn-primary' : 'btn-secondary'}`}
           style={{ marginRight: '8px' }}
         >
           Pending ({submissions.filter((s) => s.status === 'pending').length})
         </button>
         <button
-          onClick={() => setFilter('approved')}
+          onClick={() => handleFilterChange('approved')}
           className={`btn ${filter === 'approved' ? 'btn-primary' : 'btn-secondary'}`}
           style={{ marginRight: '8px' }}
         >
           Approved ({submissions.filter((s) => s.status === 'approved').length})
         </button>
         <button
-          onClick={() => setFilter('rejected')}
+          onClick={() => handleFilterChange('rejected')}
           className={`btn ${filter === 'rejected' ? 'btn-primary' : 'btn-secondary'}`}
         >
           Rejected ({submissions.filter((s) => s.status === 'rejected').length})
         </button>
       </div>
 
-      {filteredSubmissions.length === 0 ? (
-        <p>No submissions found.</p>
+      {paginatedSubmissions.length === 0 ? (
+        <p style={{ marginTop: '16px' }}>No submissions found.</p>
       ) : (
-        <table className="submissions-table">
-          <thead>
-            <tr>
-              <th>Task Title</th>
-              <th>Buyer Name</th>
-              <th>Reward</th>
-              <th>Submitted At</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredSubmissions.map((sub) => (
-              <tr key={sub._id}>
-                <td>{sub.taskTitle}</td>
-                <td>{sub.buyerName}</td>
-                <td>{sub.payableAmount} coins</td>
-                <td>{new Date(sub.submittedAt).toLocaleDateString()}</td>
-                <td>
-                  <span
-                    style={{
-                      backgroundColor: getStatusColor(sub.status),
-                      color: 'white',
-                      padding: '4px 8px',
-                      borderRadius: '4px',
-                      fontSize: '0.85rem',
-                      fontWeight: '600',
-                    }}
-                  >
-                    {sub.status.toUpperCase()}
-                  </span>
-                </td>
+        <>
+          <table className="submissions-table">
+            <thead>
+              <tr>
+                <th>Task Title</th>
+                <th>Buyer Name</th>
+                <th>Reward</th>
+                <th>Submitted At</th>
+                <th>Status</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {paginatedSubmissions.map((sub) => (
+                <tr key={sub._id}>
+                  <td>{sub.taskTitle}</td>
+                  <td>{sub.buyerName}</td>
+                  <td>{sub.payableAmount} coins</td>
+                  <td>{new Date(sub.submittedAt).toLocaleDateString()}</td>
+                  <td>
+                    <span
+                      style={{
+                        backgroundColor: getStatusColor(sub.status),
+                        color: 'white',
+                        padding: '4px 8px',
+                        borderRadius: '4px',
+                        fontSize: '0.85rem',
+                        fontWeight: '600',
+                      }}
+                    >
+                      {sub.status.toUpperCase()}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          {filteredSubmissions.length > itemsPerPage && (
+            <div className="pagination" style={{ display: 'flex', gap: '8px', marginTop: '20px', justifyContent: 'center', alignItems: 'center' }}>
+              <button
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+                className="btn btn-secondary"
+                style={{ padding: '6px 12px', fontSize: '0.85rem' }}
+              >
+                Previous
+              </button>
+              <span style={{ fontSize: '0.9rem', fontWeight: '600', color: '#475569' }}>
+                Page {currentPage} of {totalPages}
+              </span>
+              <button
+                onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                disabled={currentPage === totalPages}
+                className="btn btn-secondary"
+                style={{ padding: '6px 12px', fontSize: '0.85rem' }}
+              >
+                Next
+              </button>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
